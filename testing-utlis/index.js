@@ -1,6 +1,6 @@
 const axios = require('axios')
-const baseUrl = 'http://localhost'
-const PORT = 5000
+const baseUrl = '172.20.10.2'
+const PORT = 8000
 
 async function makeRequest(value) {
   let reqUrl = `${baseUrl}:${PORT}/todo/api/v1.0/tasks`
@@ -15,7 +15,7 @@ async function makeRequest(value) {
 }
 
 const main = async () => {
-  const res = await makeRequest(0)
+  const res = await makeRequest()
   console.log(res)
 }
 
