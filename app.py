@@ -2,9 +2,34 @@
 
 from flask import Flask, jsonify, abort, make_response, request
 from flask_cors import CORS
+import RPi.GPIO as GPIO
+from time import sleep
+import sys
 
 app = Flask(__name__)
 CORS(app)
+
+motor_channel = (29,31,33,35)
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BOARD)
+
+GPIO.setup(motor_channel, GPIO.OUT)
+
+def move_motor_gpio(di):
+    if(di == 0):
+        seq = [(GPIO.HIGH, GPIO.LOW, GPIO.LOW, GPIO.HIGH),
+                (GPIO.LOW, GPIO.LOW, GPIO.HIGH, GPIO.HIGH),
+                (GPIO.LOW, GPIO.HIGH, GPIO.HIGH, GPIO.LOW),
+                (GPIO.HIGH, GPIO.HIGH, GPIO.LOW, GPIO.LOW)]
+    else:
+        seq = [(GPIO.HIGH, GPIO.LOW, GPIO.LOW, GPIO.HIGH),
+                (GPIO.HIGH, GPIO.HIGH, GPIO.LOW, GPIO.LOW),
+                (GPIO.LOW, GPIO.HIGH, GPIO.HIGH, GPIO.LOW),
+                (GPIO.LOW, GPIO.LOW, GPIO.HIGH, GPIO.HIGH)]
+    for i in range(1024):
+        GPIO.output(motor_channel,  seq[i % 4])
+        sleep(0.02)
+
 
 @app.route('/api/v1.0/temp', methods=['GET'])
 def get_temp():
@@ -16,7 +41,13 @@ def get_carbon():
 
 @app.route('/api/v1.0/motor', methods=['GET'])
 def move_motor():
+    move_motor_gpio(0)
     return jsonify({'message', 'Succes'})
+
+@app.route('/api/v1.0/motor-l', methods=['GET'])
+def move_motor_l():
+    move_motor_gpio(1)
+    return jsonify({'message': 'Succes'})
 
 @app.errorhandler(404)
 def not_found(error):
